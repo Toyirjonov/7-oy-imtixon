@@ -11,7 +11,7 @@ export const Order = ({ product, setOrder }) => {
         <div className="order__confirmed-info">
           <img
             className="order__confirmed-info-image"
-            src="../public/images/icon-order-confirmed.svg"
+            src="/images/icon-order-confirmed.svg"
             width="48"
             height="48"
             alt=""
