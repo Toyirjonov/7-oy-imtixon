@@ -1,79 +1,80 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const updateTotel = (bascet) => {
+const updateTotal = (basket) => {
   let totalCount = 0;
   let totalPrice = 0;
-  bascet.map((product) => {
+
+  basket.forEach((product) => {
     totalCount += product.count;
     totalPrice += product.price * product.count;
   });
+
   return { totalCount, totalPrice };
 };
 
 const loadBasket = () => {
-  try {
-    const saved = localStorage.getItem("basket");
-    if (saved) {
-      const bascet = JSON.parse(saved);
-      const { totalCount, totalPrice } = updateTotel(bascet);
-      return { bascet, totalCount, totalPrice };
-    }
-  } catch {}
-  return { bascet: [], totalCount: 0, totalPrice: 0 };
+  return { basket: [], totalCount: 0, totalPrice: 0 };
 };
 
-const saveBasket = (bascet) => {
-  try {
-    localStorage.setItem("basket", JSON.stringify(bascet));
-  } catch {}
+const saveBasket = (basket) => {
 };
 
-const product = createSlice({
+const productSlice = createSlice({
   name: "product",
   initialState: loadBasket(),
   reducers: {
     addProduct: (state, { payload }) => {
-      state.bascet = [...state.bascet, payload];
-      const { totalCount, totalPrice } = updateTotel(state.bascet);
-      state.totalCount = totalCount;
-      state.totalPrice = totalPrice;
-      saveBasket(state.bascet);
+      const existingProduct = state.basket.find(
+        (item) => item.id === payload.id
+      );
+
+      if (!existingProduct) {
+        state.basket.push(payload);
+        const { totalCount, totalPrice } = updateTotal(state.basket);
+        state.totalCount = totalCount;
+        state.totalPrice = totalPrice;
+        saveBasket(state.basket);
+      }
     },
+
     delProduct: (state, { payload }) => {
-      state.bascet = state.bascet.filter((product) => product.id != payload);
-      const { totalCount, totalPrice } = updateTotel(state.bascet);
+      state.basket = state.basket.filter((product) => product.id !== payload);
+      const { totalCount, totalPrice } = updateTotal(state.basket);
       state.totalCount = totalCount;
       state.totalPrice = totalPrice;
-      saveBasket(state.bascet);
+      saveBasket(state.basket);
     },
+
     addProductCount: (state, { payload }) => {
-      state.bascet = state.bascet.map((product) => {
-        if (product.id == payload) {
-          return { ...product, count: product.count + 1 };
-        } else {
-          return product;
-        }
-      });
-      const { totalCount, totalPrice } = updateTotel(state.bascet);
-      state.totalCount = totalCount;
-      state.totalPrice = totalPrice;
-      saveBasket(state.bascet);
+      const productIndex = state.basket.findIndex(
+        (product) => product.id === payload
+      );
+
+      if (productIndex !== -1) {
+        state.basket[productIndex].count += 1;
+        const { totalCount, totalPrice } = updateTotal(state.basket);
+        state.totalCount = totalCount;
+        state.totalPrice = totalPrice;
+        saveBasket(state.basket);
+      }
     },
+
     delProductCount: (state, { payload }) => {
-      state.bascet = state.bascet.map((product) => {
-        if (product.id == payload) {
-          return { ...product, count: product.count - 1 };
-        } else {
-          return product;
-        }
-      });
-      const { totalCount, totalPrice } = updateTotel(state.bascet);
-      state.totalCount = totalCount;
-      state.totalPrice = totalPrice;
-      saveBasket(state.bascet);
+      const productIndex = state.basket.findIndex(
+        (product) => product.id === payload
+      );
+
+      if (productIndex !== -1 && state.basket[productIndex].count > 1) {
+        state.basket[productIndex].count -= 1;
+        const { totalCount, totalPrice } = updateTotal(state.basket);
+        state.totalCount = totalCount;
+        state.totalPrice = totalPrice;
+        saveBasket(state.basket);
+      }
     },
+
     deleteAll: (state) => {
-      state.bascet = [];
+      state.basket = [];
       state.totalCount = 0;
       state.totalPrice = 0;
       saveBasket([]);
@@ -87,5 +88,6 @@ export const {
   delProduct,
   delProductCount,
   deleteAll,
-} = product.actions;
-export default product.reducer;
+} = productSlice.actions;
+
+export default productSlice.reducer;
