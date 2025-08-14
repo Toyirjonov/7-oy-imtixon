@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import { deleteAll } from "../app/features/productSlice";
-import formatNumber from "../hooks/formatNumber";
+import formatNumber from "../utils/formatNumber";
 
 const OrderConfirmedIcon = () => (
   <svg
